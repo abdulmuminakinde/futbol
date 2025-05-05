@@ -1,8 +1,15 @@
 package footy
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
-type Footy struct {
+func (r Response) String() string {
+	return fmt.Sprint(r.Matches)
+}
+
+type Response struct {
 	Filters struct {
 		DateFrom   string `json:"dateFrom"`
 		DateTo     string `json:"dateTo"`

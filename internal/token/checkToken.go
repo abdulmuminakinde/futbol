@@ -1,4 +1,4 @@
-package footy
+package token
 
 import (
 	"errors"
@@ -18,6 +18,7 @@ type model struct {
 	done         bool
 }
 
+// getConfigDir returns the config directory
 func getConfigDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -26,7 +27,8 @@ func getConfigDir() string {
 	return fmt.Sprintf("%s/.config/futbol", home)
 }
 
-func getFilePath() string {
+// getFilePath returns the token file path
+func GetFilePath() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
@@ -58,7 +60,7 @@ func InitialModel() model {
 
 func setToken(token string) tea.Cmd {
 	return func() tea.Msg {
-		filePath := getFilePath()
+		filePath := GetFilePath()
 		if err := os.MkdirAll(getConfigDir(), 0o755); err != nil {
 			return errMsg{err: err}
 		}
@@ -77,7 +79,7 @@ func setToken(token string) tea.Cmd {
 
 func checkToken() tea.Cmd {
 	return func() tea.Msg {
-		filePath := getFilePath()
+		filePath := GetFilePath()
 		_, err := os.Stat(filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -151,7 +153,7 @@ func (m model) View() string {
 		return m.err.Error()
 	}
 	if m.done {
-		return fmt.Sprint("Done!\n\nPress Esc to quit")
+		return "Done!\n\nPress Esc to quit"
 	}
 
 	if m.waitingInput {
