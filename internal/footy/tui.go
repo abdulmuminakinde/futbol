@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/abdulmuminakinde/futbol/internal/token"
@@ -63,14 +61,6 @@ func getData(token string) tea.Cmd {
 	}
 }
 
-func getToken(file string) string {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
-}
-
 func InitialModel() model {
 	return model{
 		statusCode:   0,
@@ -82,7 +72,7 @@ func InitialModel() model {
 }
 
 func (m model) Init() tea.Cmd {
-	token := getToken(token.GetFilePath())
+	token := token.GetToken()
 	return getData(token)
 }
 
