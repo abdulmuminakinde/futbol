@@ -42,7 +42,13 @@ func getData(token string) tea.Cmd {
 	return func() tea.Msg {
 		var result ApiResponse
 
-		url := "https://api.football-data.org/v4/matches"
+		today := time.Now().Format("2006-01-02")
+		tomorrow := time.Now().Add(24 * time.Hour).Format("2006-01-02")
+		url := fmt.Sprintf(
+			"https://api.football-data.org/v4/matches?dateFrom=%s&dateTo=%s",
+			today,
+			tomorrow,
+		)
 		c := http.Client{Timeout: 10 * time.Second}
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
