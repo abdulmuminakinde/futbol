@@ -9,5 +9,8 @@ run: build
 set: build
 	./footy setToken
 
+today: build
+	./footy today
+
 reset:
 	rm ~/.config/futbol/token.txt
