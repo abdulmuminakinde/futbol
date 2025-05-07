@@ -2,7 +2,6 @@ package today
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -43,7 +42,7 @@ func getData(token string) tea.Cmd {
 		var result ApiResponse
 
 		today := time.Now().Format("2006-01-02")
-		tomorrow := time.Now().Add(24 * time.Hour).Format("2006-01-02")
+		tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
 		url := fmt.Sprintf(
 			"https://api.football-data.org/v4/matches?dateFrom=%s&dateTo=%s",
 			today,
@@ -72,10 +71,10 @@ func getData(token string) tea.Cmd {
 		}
 
 		if len(result.Matches) == 0 {
-			return errMsg{err: errors.New("no-matches")}
+			return tea.Msg(responseMsg(result))
 		}
 
-		return responseMsg(result)
+		return tea.Msg(responseMsg(result))
 	}
 }
 
@@ -124,19 +123,31 @@ func (r ApiResponse) String() string {
 
 	result.WriteString(fmt.Sprintf("Matches for %s\n\n", today))
 	for _, m := range r.Matches {
-		homeScore := m.Score.FullTime.Home
-		awayScore := m.Score.FullTime.Away
-		if homeScore == nil {
-			homeScore = " "
+		var homeScore, awayScore string
+		if m.Score.FullTime.Home != nil {
+			score, ok := m.Score.FullTime.Home.(float64)
+			if ok {
+				homeScore = fmt.Sprintf("%d", int(score))
+			} else {
+				homeScore = " "
+			}
 		}
-		if awayScore == nil {
-			awayScore = " "
+		if m.Score.FullTime.Away != nil {
+			score, ok := m.Score.FullTime.Away.(float64)
+			if ok {
+				awayScore = fmt.Sprintf("%d", int(score))
+			} else {
+				awayScore = " "
+			}
 		}
-		result.WriteString(fmt.Sprintf("%-25s vs %-25s [%s - %s] (%s)\n\n",
+		result.WriteString(fmt.Sprintf(
+			"%-25s [%s - %s] %-25s (%s, %s)\n\n",
 			m.HomeTeam.Name,
-			m.AwayTeam.Name,
 			homeScore, awayScore,
-			m.Competition.Name))
+			m.AwayTeam.Name,
+			m.Competition.Name,
+			m.Status, // "finished", "scheduled", "in_play"
+		))
 	}
 	return result.String()
 }
